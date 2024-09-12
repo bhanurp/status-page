@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"reflect"
 	"status-page/logger"
 	"strings"
 	"sync"
+
+	"go.uber.org/zap"
 )
 
 // NewCreateIncident creates incident struct and returns the pointer to it
@@ -28,7 +29,7 @@ func NewCreateIncident(apiKey, hostName, componentID, pageID string) *CreateInci
 // and invokes SendCreateIncidentRequest
 func (c *CreateIncident) PostIncident(wg *sync.WaitGroup) error {
 	defer wg.Done()
-	c.IncidentName = c.PipelineName
+	c.IncidentName = c.IncidentHeader
 	c.IncidentStatus = IncidentStatusIdentified
 	incidents, err := FetchUnresolvedIncidents(c.APIKey, c.HostName, c.PageID)
 	if err != nil {
@@ -51,7 +52,7 @@ func (c *CreateIncident) PostIncident(wg *sync.WaitGroup) error {
 					zap.String("IncidentURL", incident.Shortlink))
 				c.IncidentName = fmt.Sprintf("%s (more...)", incident.Name)
 				// Update incidents without resolving
-				err := c.UpdateIncidentIfPipelineFailuresOnComponentChanges(updateIncidents, incident)
+				err := c.UpdateIncidentonFailureReasonChange(updateIncidents, incident)
 				if err != nil {
 					return err
 				}
@@ -69,23 +70,23 @@ func (c *CreateIncident) PostIncident(wg *sync.WaitGroup) error {
 	return nil
 }
 
-// UpdateIncidentIfPipelineFailuresOnComponentChanges updates incidents
-// inCase if the pipelines mapped to a component failing has changed
+// UpdateIncidentonFailureReasonChange updates incidents
+// inCase if the reason for failing of component has changed
 // from earlier runs. For example if ServiceA, ServiceB failed initially
 // and an incident is created and now only ServiceB is failing updates
 // incident with message ServiceB is failing
-func (c *CreateIncident) UpdateIncidentIfPipelineFailuresOnComponentChanges(updateIncidents []string, incident Incident) error {
-	logger.Info("Pipelines failing has changed from earlier identified")
-	// If pipelines failing from earlier monitor is same as current monitor run no need to update incident for the component
+func (c *CreateIncident) UpdateIncidentonFailureReasonChange(updateIncidents []string, incident Incident) error {
+	logger.Info("Incident failure reason has changed from earlier identified")
+	// If reasons for failing from earlier monitor is same as current monitor run no need to update incident for the component
 	if reflect.DeepEqual(incident.Metadata.Data, c.Metadata.Data) {
 		return nil
 	}
-	// If pipelines from earlier monitor is different to current monitor run update incidents
-	u := NewUpdateIncident(c.APIKey, c.HostName, c.ComponentID, c.PageID, c.IncidentBody, c.PipelineName, IncidentStatusIdentified)
+	// If incident metadata is
+	u := NewUpdateIncident(c.APIKey, c.HostName, c.ComponentID, c.PageID, c.IncidentBody, c.IncidentHeader, IncidentStatusIdentified)
 	u.IncidentName = c.IncidentName
 	u.Metadata = c.Metadata
 
-	err := u.UpdateIncidentMatchingWithComponent(incident.ID, ComponentStatusMajorOutage, string(createIncidentMetaData(c.Metadata)))
+	err := u.UpdateIncidentMatchingWithComponent(incident.ID, ComponentStatusMajorOutage)
 	if err != nil {
 		return err
 	}
@@ -177,7 +178,7 @@ func FetchUnresolvedIncidents(apiKey, hostName, pageID string) ([]Incident, erro
 	if err != nil {
 		return incidents, err
 	}
-	response := fmt.Sprintf("%s", b)
+	response := string(b)
 	logger.Debug("Response from fetch all unresolved ", zap.String("Response", response))
 	if resp.StatusCode == http.StatusOK {
 		err = json.Unmarshal(b, &incidents)

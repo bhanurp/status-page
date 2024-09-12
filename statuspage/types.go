@@ -12,7 +12,7 @@ type CreateIncident struct {
 	IncidentBody   string
 	ComponentID    string
 	PageID         string
-	PipelineName   string
+	IncidentHeader string
 	Metadata       Metadata
 }
 
@@ -31,8 +31,7 @@ type UpdateIncident struct {
 	IncidentBody   string
 	ComponentID    string
 	PageID         string
-	PipelineURL    string
-	PipelineName   string
+	IncidentHeader string
 	Metadata       Metadata
 }
 

@@ -3,24 +3,24 @@ package incident
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
-	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"status-page/logger"
 	"strings"
 	"sync"
+
+	"go.uber.org/zap"
 )
 
-func NewUpdateIncident(apiKey, hostName, componentID, pageID, pipelineURL, pipelineName, incidentStatus string) *UpdateIncident {
+func NewUpdateIncident(apiKey, hostName, componentID, pageID, incidentBody, incidentHeader, incidentStatus string) *UpdateIncident {
 	u := new(UpdateIncident)
 	u.APIKey = apiKey
 	u.HostName = hostName
 	u.ComponentID = componentID
 	u.PageID = pageID
 	u.IncidentStatus = incidentStatus
-	u.PipelineURL = pipelineURL
-	u.PipelineName = pipelineName
+	u.IncidentHeader = incidentHeader
+	u.IncidentBody = incidentBody
 	u.Metadata = Metadata{}
 	return u
 }
@@ -39,7 +39,7 @@ func (u *UpdateIncident) ResolveIncidents(wg *sync.WaitGroup) error {
 	for _, incident := range incidents {
 		for _, component := range incident.Components {
 			// Consider updating incidents only when component ID matches and has prefix in component Name as IncidentNamePrefix
-			if strings.Trim(u.ComponentID, " ") == component.ID && (strings.HasPrefix(incident.Name, IncidentNamePrefix) || strings.HasPrefix(incident.Name, IncidentNameOldPrefix)) {
+			if strings.Trim(u.ComponentID, " ") == component.ID && (strings.HasPrefix(incident.Name, IncidentNamePrefix)) {
 				unresolvedIncidents = append(unresolvedIncidents, incident.ID)
 				logger.Debug("unresolved incidents for component id : ", zap.Strings("unresolvedIncidents", unresolvedIncidents))
 				u.IncidentName = incident.Name
@@ -105,7 +105,7 @@ func (u *UpdateIncident) UpdateIncidentMatchingWithComponent(unresolvedIncident 
 func (u *UpdateIncident) prepareIncidentBodyRequest(componentStatus string) []byte {
 	//u.IncidentName = fmt.Sprintf("%s %s", utils.IncidentNamePrefix, u.IncidentName)
 	data := Payload{}
-	data.Incident.Body = fmt.Sprintf("Pipeline Name: %s PipelineStatus: %s FailedPipelineURL: %s \n", u.PipelineName, "failed", u.PipelineURL)
+	data.Incident.Body = ""
 	data.Incident.Name = u.IncidentName
 	data.Incident.Status = u.IncidentStatus
 	data.Incident.ComponentIds = append(data.Incident.ComponentIds, u.ComponentID)
