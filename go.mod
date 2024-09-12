@@ -1,6 +1,6 @@
 module status-page
 
-go 1.22.1
+go 1.23
 
 require go.uber.org/zap v1.27.0
 
