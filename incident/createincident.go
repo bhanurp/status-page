@@ -1,26 +1,29 @@
 package incident
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"reflect"
-	"status-page/logger"
 	"strings"
 	"sync"
+
+	"github.com/bhanurp/rest"
+	"github.com/bhanurp/status-page/logger"
 
 	"go.uber.org/zap"
 )
 
-// NewCreateIncident creates incident struct and returns the pointer to it
-func NewCreateIncident(apiKey, hostName, componentID, pageID string) *CreateIncident {
+// NewDefaultIncident creates incident struct and returns the pointer to it
+func NewDefaultIncident(apiKey, hostName, componentID, pageID, incidentName, incidentBody string) *CreateIncident {
 	c := new(CreateIncident)
 	c.APIKey = apiKey
 	c.HostName = hostName
 	c.ComponentID = componentID
 	c.PageID = pageID
+	c.IncidentName = incidentName
+	c.IncidentBody = incidentBody
+	c.IncidentStatus = IncidentStatusIdentified
 	c.Metadata = Metadata{}
 	return c
 }
@@ -29,7 +32,6 @@ func NewCreateIncident(apiKey, hostName, componentID, pageID string) *CreateInci
 // and invokes SendCreateIncidentRequest
 func (c *CreateIncident) PostIncident(wg *sync.WaitGroup) error {
 	defer wg.Done()
-	c.IncidentName = c.IncidentHeader
 	c.IncidentStatus = IncidentStatusIdentified
 	incidents, err := FetchUnresolvedIncidents(c.APIKey, c.HostName, c.PageID)
 	if err != nil {
@@ -117,32 +119,19 @@ func (c *CreateIncident) SendCreateIncidentRequest(apiKey string) error {
 	if err != nil {
 		logger.Error("Failed to marshal incident data")
 	}
-	body := bytes.NewReader(payloadBytes)
-	req, err := http.NewRequest("POST", c.HostName+"/v1/pages/"+c.PageID+"/incidents", body)
+	headers := make(map[string]string, 0)
+	headers["Authorization"] = "OAuth " + apiKey
+	headers["Content-Type"] = "application/json"
+	p := rest.PostRequest{}
+	resp, err := p.Do("https://"+c.HostName+"/v1/pages/"+c.PageID+"/incidents", payloadBytes, headers, 10)
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Authorization", "OAuth "+apiKey)
-	req.Header.Set("Content-Type", "application/json")
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return err
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			logger.Error("Unable to close response body")
-		}
-	}(resp.Body)
 	logger.Debug("Created Incident on ",
 		zap.String("ComponentID", c.ComponentID))
 	if resp.StatusCode/100 == 2 {
-		bodyBytes, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return err
-		}
 		createdIncident := Incident{}
-		err = json.Unmarshal(bodyBytes, &createdIncident)
+		err = json.Unmarshal(resp.Body, &createdIncident)
 		if err != nil {
 			return err
 		}
@@ -152,11 +141,7 @@ func (c *CreateIncident) SendCreateIncidentRequest(apiKey string) error {
 			zap.String("CreatedIncidentID", createdIncident.ID),
 			zap.String("CreatedIncidentURL", createdIncident.Shortlink))
 	} else {
-		bodyBytes, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return err
-		}
-		logger.Debug(string(bodyBytes))
+		logger.Debug(string(resp.Body))
 	}
 	return nil
 }
@@ -164,29 +149,20 @@ func (c *CreateIncident) SendCreateIncidentRequest(apiKey string) error {
 // FetchUnresolvedIncidents returns all unresolved incidents for the status page
 func FetchUnresolvedIncidents(apiKey, hostName, pageID string) ([]Incident, error) {
 	incidents := make([]Incident, 0)
-	req, err := http.NewRequest("GET", hostName+"/v1/pages/"+pageID+"/incidents/unresolved", nil)
+	get := rest.GetRequest{}
+	resp, err := get.Do("https://"+hostName+"/v1/pages/"+pageID+"/incidents/unresolved", nil, map[string]string{"Authorization": "OAuth " + apiKey}, 10)
 	if err != nil {
 		return incidents, err
 	}
-	req.Header.Set("Authorization", "OAuth "+apiKey)
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return incidents, err
-	}
-	defer resp.Body.Close()
-	b, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return incidents, err
-	}
-	response := string(b)
+	response := string(resp.Body)
 	logger.Debug("Response from fetch all unresolved ", zap.String("Response", response))
 	if resp.StatusCode == http.StatusOK {
-		err = json.Unmarshal(b, &incidents)
+		err = json.Unmarshal(resp.Body, &incidents)
 		if err != nil {
 			return incidents, err
 		}
 	} else {
-		logger.Debug(string(b))
+		logger.Debug(string(resp.Body))
 	}
 	return incidents, nil
 }

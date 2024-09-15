@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"status-page/logger"
 	"strings"
 	"sync"
+
+	"github.com/bhanurp/status-page/logger"
 
 	"go.uber.org/zap"
 )

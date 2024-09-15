@@ -1,27 +1,17 @@
 package e2e
 
 import (
-	"os"
 	"testing"
-
-	"github.com/bhanurp/status-page/statuspage" // Replace "your-package-path" with the actual package path
 )
 
 func TestCreateIncident(t *testing.T) {
-	client := statuspage.NewClient(os.Getenv("STATUS_PAGE_BEARER_TOKEN"))
-
-	// Create Incident
-	createIncident := client.Incident{
-		Name:   "Test Incident",
-		Status: "investigating",
-	}
-	createdIncident, err := client.CreateIncident(createIncident)
-	if err != nil {
-		t.Fatalf("Failed to create incident: %v", err)
-	}
-
+	inite2e()
+	numberOfIncidents := fetchUnresolvedIncidentsCount()
+	apiKey, statusPageID, statusPageComponentID, hostName := fetchStatusPageDetails()
+	createIncident(apiKey, hostName, statusPageComponentID, statusPageID, "TestFailure1", "", t)
 	// Verify the created incident
-	if createdIncident.Name != createIncident.Name {
-		t.Fatalf("Expected incident name %s, got %s", createIncident.Name, createdIncident.Name)
+	numberOfIncidentsAfterCreate := fetchUnresolvedIncidentsCount()
+	if numberOfIncidentsAfterCreate != numberOfIncidents+1 {
+		t.Fatalf("Expected to find incident with name 'TestFailure1' in unresolved incidents")
 	}
 }

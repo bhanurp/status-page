@@ -1,8 +1,8 @@
 package main
 
 import (
-	"log"
-	"status-page/app"
+	"github.com/bhanurp/status-page/app"
+	"github.com/bhanurp/status-page/logger"
 )
 
 func main() {
@@ -10,6 +10,6 @@ func main() {
 	app := &app.App{}
 	// Start the application
 	if err := app.Run(); err != nil {
-		log.Fatalf(err.Error())
+		logger.Fatal(err.Error())
 	}
 }

@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
-	"status-page/logger"
 	"strings"
+
+	"github.com/bhanurp/status-page/logger"
 
 	"go.uber.org/zap"
 )

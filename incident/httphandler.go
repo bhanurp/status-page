@@ -3,10 +3,11 @@ package incident
 import (
 	"encoding/json"
 	"errors"
-	"go.uber.org/zap"
+	"github.com/bhanurp/status-page/logger"
 	"io"
 	"net/http"
-	"status-page/logger"
+
+	"go.uber.org/zap"
 )
 
 type StatusPageHTTPClient struct {
