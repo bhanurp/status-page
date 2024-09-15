@@ -20,5 +20,4 @@ func (a *App) initialize() {
 func (a *App) initializeConfig() {
 	// Read the configuration from the .env file
 	a.token = os.Getenv("STATUS_PAGE_BEARER_TOKEN")
-	return
 }

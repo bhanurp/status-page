@@ -1,4 +1,4 @@
-module status-page
+module github.com/bhanurp/status-page
 
 go 1.23
 
