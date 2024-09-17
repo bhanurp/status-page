@@ -1,17 +1,21 @@
 package incident
 
 import (
-	"bytes"
 	"encoding/json"
 	"io"
 	"net/http"
 	"strings"
 	"sync"
 
+	"github.com/bhanurp/rest"
 	"github.com/bhanurp/status-page/logger"
 
 	"go.uber.org/zap"
 )
+
+func NewDefaultUpdateIncident() *UpdateIncident {
+	return new(UpdateIncident)
+}
 
 func NewUpdateIncident(apiKey, hostName, componentID, pageID, incidentBody, incidentHeader, incidentStatus string) *UpdateIncident {
 	u := new(UpdateIncident)
@@ -24,6 +28,38 @@ func NewUpdateIncident(apiKey, hostName, componentID, pageID, incidentBody, inci
 	u.IncidentBody = incidentBody
 	u.Metadata = Metadata{}
 	return u
+}
+
+func (u *UpdateIncident) SetIncidentName(incidentName string) {
+	u.IncidentName = incidentName
+}
+
+func (u *UpdateIncident) SetAPIKey(apiKey string) {
+	u.APIKey = apiKey
+}
+
+func (u *UpdateIncident) SetHostName(hostName string) {
+	u.HostName = hostName
+}
+
+func (u *UpdateIncident) SetComponentID(componentID string) {
+	u.ComponentID = componentID
+}
+
+func (u *UpdateIncident) SetPageID(pageID string) {
+	u.PageID = pageID
+}
+
+func (u *UpdateIncident) SetIncidentStatus(incidentStatus string) {
+	u.IncidentStatus = incidentStatus
+}
+
+func (u *UpdateIncident) SetIncidentHeader(incidentHeader string) {
+	u.IncidentHeader = incidentHeader
+}
+
+func (u *UpdateIncident) SetIncidentBody(incidentBody string) {
+	u.IncidentBody = incidentBody
 }
 
 // ResolveIncidents fetches all unresolved incidents on the status page and filters
@@ -82,22 +118,16 @@ func (u *UpdateIncident) FetchUnresolvedIncidents() ([]Incident, error) {
 
 // UpdateIncidentMatchingWithComponent Sends which incidents has to be resolved on a given component ID
 func (u *UpdateIncident) UpdateIncidentMatchingWithComponent(unresolvedIncident string, componentStatus string) error {
-	statusPageHTTPClient := new(StatusPageHTTPClient)
 	payloadBytes := u.prepareIncidentBodyRequest(componentStatus)
-	logger.Debug(" Received for updating incident", zap.String("Payload", string(payloadBytes)))
-	body := bytes.NewReader(payloadBytes)
-	req, err := http.NewRequest("PUT", u.HostName+"/v1/pages/"+u.PageID+"/incidents/"+unresolvedIncident, body)
-	if err != nil {
-		logger.Warn("Failed to update incident: " + unresolvedIncident)
-	}
-	req.Header.Set("Authorization", "OAuth "+u.APIKey)
-	req.Header.Set("Content-Type", "application/json")
-	statusPageHTTPClient.req = req
-	err = statusPageHTTPClient.SendHTTPRequest(unresolvedIncident)
+	m := make(map[string]string)
+	m["Authorization"] = "OAuth " + u.APIKey
+	m["Content-Type"] = "application/json"
+	put := &rest.PutRequest{}
+	resp, err := put.Do("https://"+u.HostName+"/v1/pages/"+u.PageID+"/incidents/"+unresolvedIncident, payloadBytes, m, 10)
 	if err != nil {
 		return err
 	}
-	logger.Info("Completed performing updating of incidents")
+	logger.Info("Response", zap.String("response", string(resp.Body)))
 	return nil
 }
 

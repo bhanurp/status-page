@@ -1,7 +1,7 @@
 package e2e
 
 import (
-	"os"
+	"log"
 	"testing"
 
 	"github.com/bhanurp/status-page/incident"
@@ -9,10 +9,7 @@ import (
 
 func TestUpdateIncident(t *testing.T) {
 	inite2e()
-	apiKey := os.Getenv("STATUS_PAGE_BEARER_TOKEN")
-	statusPageID := os.Getenv("STATUS_PAGE_ID")
-	statusPageComponentID := os.Getenv("STATUS_PAGE_COMPONENT_ID")
-	hostName := os.Getenv("STATUS_PAGE_HOSTNAME")
+	apiKey, statusPageID, statusPageComponentID, hostName := fetchStatusPageDetails()
 
 	createIncident(apiKey, hostName, statusPageComponentID, statusPageID, "TestUpdateIncident", "", t)
 	incidents, err := fetchUnresolvedIncidents()
@@ -20,22 +17,26 @@ func TestUpdateIncident(t *testing.T) {
 		t.Fatalf("Failed to fetch unresolved incidents: %v", err)
 	}
 	var incidentToBeUpdated incident.Incident
-	for _, incident := range incidents {
-		if incident.Name == "TestUpdateIncident" {
-			incidentToBeUpdated = incident
+	for _, i := range incidents {
+		log.Println(i.Name)
+		if i.Name == incident.IncidentNamePrefix+" TestUpdateIncident" {
+			log.Println("Incident to be updated: ", i.Name)
+			incidentToBeUpdated = i
 		}
 	}
+	if incidentToBeUpdated.ID == "" {
+		t.Fatalf("Failed to find incident with name 'TestUpdateIncident' in unresolved incidents")
+	}
 	countOfIncidentsBeforeUpdate := len(incidents)
-	updateIncident := incident.NewUpdateIncident(apiKey, hostName, statusPageComponentID, statusPageID, "UpdatedIncidentBody", "", "TestUpdateIncident")
+	updateIncident := incident.NewUpdateIncident(apiKey, hostName, statusPageComponentID, statusPageID, "UpdatedIncidentBody", "", incident.IncidentStatusResolved)
+	updateIncident.SetIncidentName(incidentToBeUpdated.Name)
 	// Create an incident to update
-	err = updateIncident.UpdateIncidentMatchingWithComponent(incidentToBeUpdated.ID, "operational")
+	err = updateIncident.UpdateIncidentMatchingWithComponent(incidentToBeUpdated.ID, incident.ComponentStatusOperational)
 	if err != nil {
 		t.Fatalf("Failed to update incident: %v", err)
 	}
-
 	afterUpdateIncidents := fetchUnresolvedIncidentsCount()
-
 	if countOfIncidentsBeforeUpdate-1 != afterUpdateIncidents {
-		t.Fatalf("Expected to find incident with name 'TestUpdateIncident' in unresolved incidents")
+		t.Fatalf("countOfIncidentsBeforeUpdate: %d is not greater than afterUpdateIncidents: %d", countOfIncidentsBeforeUpdate, afterUpdateIncidents)
 	}
 }
