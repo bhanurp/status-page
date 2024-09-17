@@ -25,4 +25,9 @@ jobs:
       run: go build -v ./...
 
     - name: Test
+      env: 
+        STATUS_PAGE_BEARER_TOKEN: ${{ secrets.STATUS_PAGE_BEARER_TOKEN }}
+        STATUS_PAGE_COMPONENT_ID: ${{ secrets.STATUS_PAGE_COMPONENT_ID }}
+        STATUS_PAGE_ID: ${{ secrets.STATUS_PAGE_ID }}
+        STATUS_PAGE_HOSTNAME: ${{ secrets.STATUS_PAGE_HOSTNAME }}
       run: go test -v ./...

@@ -5,13 +5,11 @@ import (
 	"testing"
 
 	"github.com/bhanurp/status-page/incident"
+	"github.com/bhanurp/status-page/logger"
 )
 
 func inite2e() {
-	os.Setenv("STATUS_PAGE_BEARER_TOKEN", "a18f8b4b9a164b708e3bc3957258829b")
-	os.Setenv("STATUS_PAGE_ID", "3mz82cxnz2x9")
-	os.Setenv("STATUS_PAGE_COMPONENT_ID", "9dmxjrwqp3qc")
-	os.Setenv("STATUS_PAGE_HOSTNAME", "api.statuspage.io")
+	logger.Info("Starting e2e tests")
 }
 
 func fetchStatusPageDetails() (string, string, string, string) {
