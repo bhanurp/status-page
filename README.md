@@ -6,14 +6,17 @@ This repository contains the code for the status page http go client, which allo
 
 ## Overview
 
-The `status-page` project provides an API for managing incidents on a status page. It includes functionality for creating, updating, and deleting incidents, as well as fetching unresolved incidents.
+The `status-page` provides an API for managing incidents on a status page. It includes functionality for
+  - creating incidents
+  - updating incidents
+  - deleting incidents
+  - fetching all incidents
 
 ## Setup
 
 ### Prerequisites
 
-- Go 1.16 or higher
-- Git
+- Go 1.23 or higher
 - Environment variables:
   - `STATUS_PAGE_BEARER_TOKEN`: Your API key for authentication
   - `STATUS_PAGE_ID`: The ID of your status page
@@ -24,23 +27,23 @@ The `status-page` project provides an API for managing incidents on a status pag
 
 1. Clone the repository:
 
-   ```sh
-   git clone https://github.com/bhanurp/status-page.git
-   cd status-page
-   ```
+    ```sh
+    git clone https://github.com/bhanurp/status-page.git
+    cd status-page
+    ```
 
 2. Install Dependencies
 
-  ```sh
-  go mod tidy
-  ```
+    ```sh
+    go mod tidy
+    ```
 
 3. Running Tests
 
   To run the tests, ensure that the necessary environment variables are set and use the following command:
-  ```sh
-  go test -v ./...
-  ```
+    ```sh
+    go test -v ./...
+    ```
 
 ### Usage
 #### Creating an Incident
