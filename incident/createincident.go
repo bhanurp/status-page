@@ -58,14 +58,12 @@ func (c *CreateIncident) PostIncident(wg *sync.WaitGroup) error {
 				if err != nil {
 					return err
 				}
-				SetOutputVariables(incident)
-				// Returning from here since there is no need to create one more incident
 				return nil
 			}
 		}
 	}
 	// Create http request with incident name, status, component ID and status
-	err = c.SendCreateIncidentRequest(c.APIKey)
+	_, err = c.SendCreateIncidentRequest(c.APIKey)
 	if err != nil {
 		return err
 	}
@@ -95,15 +93,8 @@ func (c *CreateIncident) UpdateIncidentonFailureReasonChange(updateIncidents []s
 	return nil
 }
 
-// SetOutputVariables creates logger output variables which can be used after executing task
-func SetOutputVariables(createdIncident Incident) {
-	logger.Debug("Updating output variables, ",
-		zap.String("IncidentID", createdIncident.ID),
-		zap.String("CreatedIncidentURL", createdIncident.Shortlink))
-}
-
 // SendCreateIncidentRequest calls to create incident on status page, component CreateIncident configured.
-func (c *CreateIncident) SendCreateIncidentRequest(apiKey string) error {
+func (c *CreateIncident) SendCreateIncidentRequest(apiKey string) (*Incident, error) {
 	logger.Debug("Sending Create Incident request")
 	c.IncidentName = fmt.Sprintf("%s %s", IncidentNamePrefix, c.IncidentName)
 	data := Payload{}
@@ -125,25 +116,24 @@ func (c *CreateIncident) SendCreateIncidentRequest(apiKey string) error {
 	p := rest.PostRequest{}
 	resp, err := p.Do("https://"+c.HostName+"/v1/pages/"+c.PageID+"/incidents", payloadBytes, headers, 10)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	logger.Debug("Created Incident on ",
 		zap.String("ComponentID", c.ComponentID))
+	var createdIncident Incident
 	if resp.StatusCode/100 == 2 {
-		createdIncident := Incident{}
+		createdIncident = Incident{}
 		err = json.Unmarshal(resp.Body, &createdIncident)
 		if err != nil {
-			return err
+			return nil, err
 		}
-		// Set output variables
-		SetOutputVariables(createdIncident)
 		logger.Info("Created task incident ID: %s and incident URL is %s",
 			zap.String("CreatedIncidentID", createdIncident.ID),
 			zap.String("CreatedIncidentURL", createdIncident.Shortlink))
-	} else {
-		logger.Debug(string(resp.Body))
+
 	}
-	return nil
+	logger.Debug(string(resp.Body))
+	return &createdIncident, nil
 }
 
 // FetchUnresolvedIncidents returns all unresolved incidents for the status page

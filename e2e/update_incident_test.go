@@ -1,29 +1,22 @@
 package e2e
 
 import (
-	"log"
 	"testing"
 
+	"github.com/bhanurp/status-page/e2e/utils"
 	"github.com/bhanurp/status-page/incident"
 )
 
 func TestUpdateIncident(t *testing.T) {
-	inite2e()
-	apiKey, statusPageID, statusPageComponentID, hostName := fetchStatusPageDetails()
+	utils.Inite2e()
+	apiKey, statusPageID, statusPageComponentID, hostName := utils.FetchStatusPageDetails()
 
-	createIncident(apiKey, hostName, statusPageComponentID, statusPageID, "TestUpdateIncident", "", t)
-	incidents, err := fetchUnresolvedIncidents()
+	utils.CreateIncident(apiKey, hostName, statusPageComponentID, statusPageID, "TestUpdateIncident", "", t)
+	incidents, err := utils.FetchUnresolvedIncidents()
 	if err != nil {
 		t.Fatalf("Failed to fetch unresolved incidents: %v", err)
 	}
-	var incidentToBeUpdated incident.Incident
-	for _, i := range incidents {
-		log.Println(i.Name)
-		if i.Name == incident.IncidentNamePrefix+" TestUpdateIncident" {
-			log.Println("Incident to be updated: ", i.Name)
-			incidentToBeUpdated = i
-		}
-	}
+	incidentToBeUpdated := utils.FetchIncidentByNameFromUnresolvedIncidents(incident.IncidentNamePrefix + " TestUpdateIncident")
 	if incidentToBeUpdated.ID == "" {
 		t.Fatalf("Failed to find incident with name 'TestUpdateIncident' in unresolved incidents")
 	}
@@ -35,7 +28,7 @@ func TestUpdateIncident(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to update incident: %v", err)
 	}
-	afterUpdateIncidents := fetchUnresolvedIncidentsCount()
+	afterUpdateIncidents := utils.FetchUnresolvedIncidentsCount()
 	if countOfIncidentsBeforeUpdate-1 != afterUpdateIncidents {
 		t.Fatalf("countOfIncidentsBeforeUpdate: %d is not greater than afterUpdateIncidents: %d", countOfIncidentsBeforeUpdate, afterUpdateIncidents)
 	}

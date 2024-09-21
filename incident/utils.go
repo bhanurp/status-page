@@ -17,3 +17,15 @@ const (
 	// Component major outage
 	ComponentStatusMajorOutage = "major_outage"
 )
+
+func createHeaders(apiKey string) map[string]string {
+	headers := make(map[string]string, 0)
+	headers["Content-Type"] = "application/json"
+	headers["Authorization"] = "OAuth " + apiKey
+	return headers
+}
+
+// CreateStatusPageURL constructs the URL for the status page incident.
+func createStatusPageURL(pageID, incidentID string) string {
+	return "https://api.statuspage.io/v1/pages/" + pageID + "/incidents/" + incidentID
+}
