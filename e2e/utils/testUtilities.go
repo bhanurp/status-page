@@ -70,7 +70,7 @@ func FetchStatusPageComponentID() string {
 }
 
 func FetchHostName() string {
-	return os.Getenv("HOST_NAME")
+	return "api.statuspage.io"
 }
 
 func GetIncidentName() string {
