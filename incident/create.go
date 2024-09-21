@@ -132,8 +132,6 @@ func (c *CreateIncident) SendCreateIncidentRequest() (*Incident, error) {
 	if err != nil {
 		return nil, err
 	}
-	logger.Debug("Created Incident on ",
-		zap.String("ComponentID", c.ComponentID))
 	var createdIncident Incident
 	if resp.StatusCode/100 == 2 {
 		createdIncident = Incident{}
@@ -147,7 +145,7 @@ func (c *CreateIncident) SendCreateIncidentRequest() (*Incident, error) {
 
 	}
 	logger.Debug(string(resp.Body))
-	return &createdIncident, nil
+	return &createdIncident, err
 }
 
 // fetchUnresolvedIncidents returns all unresolved incidents for the status page

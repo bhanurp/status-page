@@ -23,6 +23,6 @@ func TestCreateIncident(t *testing.T) {
 	// Verify the created incident
 	numberOfIncidentsAfterCreate := utils.FetchUnresolvedIncidentsCount()
 	if numberOfIncidentsAfterCreate != numberOfIncidents+1 {
-		t.Fatalf("Expected to find incident with name 'TestFailure1' in unresolved incidents")
+		t.Fatalf("Failed to create incident")
 	}
 }

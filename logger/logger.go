@@ -10,6 +10,7 @@ var zapLog *zap.Logger
 func init() {
 	var err error
 	config := zap.NewProductionConfig()
+	config.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
 	encoderConfig := zap.NewProductionEncoderConfig()
 	zapcore.TimeEncoderOfLayout("Jan _2 15:04:05.000000000")
 	config.EncoderConfig = encoderConfig
