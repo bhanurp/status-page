@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
-	"strings"
-	"sync"
 
 	"github.com/bhanurp/rest"
 	"github.com/bhanurp/status-page/logger"
@@ -28,46 +26,62 @@ func NewDefaultIncident(apiKey, hostName, componentID, pageID, incidentName, inc
 	return c
 }
 
-// PostIncident Checks if an Incident is already present for given component on the status page
-// and invokes SendCreateIncidentRequest
-func (c *CreateIncident) PostIncident(wg *sync.WaitGroup) error {
-	defer wg.Done()
-	c.IncidentStatus = IncidentStatusIdentified
-	incidents, err := FetchUnresolvedIncidents(c.APIKey, c.HostName, c.PageID)
-	if err != nil {
-		return err
-	}
-	logger.Debug("unresolved incidents for page: ",
-		zap.Any("UnresolvedIncidents", incidents))
-	updateIncidents := make([]string, 0)
-	// Iterate over existing incidents for evert incident
-	for _, incident := range incidents {
-		for _, component := range incident.Components {
-			logger.Debug("component details",
-				zap.String("componentID", c.ComponentID),
-				zap.String("existing componentID", component.ID),
-				zap.String("IncidentName", incident.Name),
-				zap.String("IncidentPrefix", IncidentNamePrefix),
-			)
-			if strings.Trim(c.ComponentID, " ") == component.ID && strings.HasPrefix(incident.Name, IncidentNamePrefix) {
-				logger.Warn("An incident on component exist ",
-					zap.String("IncidentURL", incident.Shortlink))
-				c.IncidentName = fmt.Sprintf("%s (more...)", incident.Name)
-				// Update incidents without resolving
-				err := c.UpdateIncidentonFailureReasonChange(updateIncidents, incident)
-				if err != nil {
-					return err
-				}
-				return nil
-			}
-		}
-	}
-	// Create http request with incident name, status, component ID and status
-	_, err = c.SendCreateIncidentRequest(c.APIKey)
-	if err != nil {
-		return err
-	}
-	return nil
+func BuildCreateIncident() *CreateIncident {
+	return new(CreateIncident)
+}
+
+// SetAPIKey sets the API key and returns the CreateIncident pointer
+func (c *CreateIncident) SetAPIKey(apiKey string) *CreateIncident {
+	c.APIKey = apiKey
+	return c
+}
+
+// SetHostName sets the host name and returns the CreateIncident pointer
+func (c *CreateIncident) SetHostName(hostName string) *CreateIncident {
+	c.HostName = hostName
+	return c
+}
+
+// SetComponentID sets the component ID and returns the CreateIncident pointer
+func (c *CreateIncident) SetComponentID(componentID string) *CreateIncident {
+	c.ComponentID = componentID
+	return c
+}
+
+// SetPageID sets the page ID and returns the CreateIncident pointer
+func (c *CreateIncident) SetPageID(pageID string) *CreateIncident {
+	c.PageID = pageID
+	return c
+}
+
+// SetIncidentName sets the incident name and returns the CreateIncident pointer
+func (c *CreateIncident) SetIncidentName(incidentName string) *CreateIncident {
+	c.IncidentName = incidentName
+	return c
+}
+
+// SetIncidentBody sets the incident body and returns the CreateIncident pointer
+func (c *CreateIncident) SetIncidentBody(incidentBody string) *CreateIncident {
+	c.IncidentBody = incidentBody
+	return c
+}
+
+// SetIncidentStatus sets the incident status and returns the CreateIncident pointer
+func (c *CreateIncident) SetIncidentStatus(incidentStatus string) *CreateIncident {
+	c.IncidentStatus = incidentStatus
+	return c
+}
+
+// SetMetadata sets the metadata and returns the CreateIncident pointer
+func (c *CreateIncident) SetMetadata(metadata Metadata) *CreateIncident {
+	c.Metadata = metadata
+	return c
+}
+
+// SetIncidentHeader sets the incident header and returns the CreateIncident pointer
+func (c *CreateIncident) SetIncidentHeader(incidentHeader string) *CreateIncident {
+	c.IncidentHeader = incidentHeader
+	return c
 }
 
 // UpdateIncidentonFailureReasonChange updates incidents
@@ -94,7 +108,7 @@ func (c *CreateIncident) UpdateIncidentonFailureReasonChange(updateIncidents []s
 }
 
 // SendCreateIncidentRequest calls to create incident on status page, component CreateIncident configured.
-func (c *CreateIncident) SendCreateIncidentRequest(apiKey string) (*Incident, error) {
+func (c *CreateIncident) SendCreateIncidentRequest() (*Incident, error) {
 	logger.Debug("Sending Create Incident request")
 	c.IncidentName = fmt.Sprintf("%s %s", IncidentNamePrefix, c.IncidentName)
 	data := Payload{}
@@ -111,7 +125,7 @@ func (c *CreateIncident) SendCreateIncidentRequest(apiKey string) (*Incident, er
 		logger.Error("Failed to marshal incident data")
 	}
 	headers := make(map[string]string, 0)
-	headers["Authorization"] = "OAuth " + apiKey
+	headers["Authorization"] = "OAuth " + c.APIKey
 	headers["Content-Type"] = "application/json"
 	p := rest.PostRequest{}
 	resp, err := p.Do("https://"+c.HostName+"/v1/pages/"+c.PageID+"/incidents", payloadBytes, headers, 10)
@@ -136,8 +150,9 @@ func (c *CreateIncident) SendCreateIncidentRequest(apiKey string) (*Incident, er
 	return &createdIncident, nil
 }
 
-// FetchUnresolvedIncidents returns all unresolved incidents for the status page
-func FetchUnresolvedIncidents(apiKey, hostName, pageID string) ([]Incident, error) {
+// fetchUnresolvedIncidents returns all unresolved incidents for the status page
+func fetchUnresolvedIncidents() ([]Incident, error) {
+	apiKey, pageID, _, hostName := FetchStatusPageDetails()
 	incidents := make([]Incident, 0)
 	get := rest.GetRequest{}
 	resp, err := get.Do("https://"+hostName+"/v1/pages/"+pageID+"/incidents/unresolved", nil, map[string]string{"Authorization": "OAuth " + apiKey}, 10)
@@ -151,8 +166,26 @@ func FetchUnresolvedIncidents(apiKey, hostName, pageID string) ([]Incident, erro
 		if err != nil {
 			return incidents, err
 		}
-	} else {
-		logger.Debug(string(resp.Body))
 	}
+	logger.Debug(string(resp.Body))
 	return incidents, nil
+}
+
+func fetchIncidentByIncidentID(apiKey, hostName, pageID, incidentID string) (*Incident, error) {
+	incident := new(Incident)
+	get := rest.GetRequest{}
+	resp, err := get.Do("https://"+hostName+"/v1/pages/"+pageID+"/incidents/"+incidentID, nil, map[string]string{"Authorization": "OAuth " + apiKey}, 10)
+	if err != nil {
+		return incident, err
+	}
+	response := string(resp.Body)
+	logger.Debug("Response from fetch incident by ID ", zap.String("Response", response))
+	if resp.StatusCode == http.StatusOK {
+		err = json.Unmarshal(resp.Body, incident)
+		if err != nil {
+			return incident, err
+		}
+	}
+	logger.Debug(string(resp.Body))
+	return incident, nil
 }

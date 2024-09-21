@@ -24,6 +24,7 @@ type Data struct {
 }
 
 type UpdateIncident struct {
+	ID             string
 	HostName       string
 	APIKey         string
 	IncidentName   string
@@ -91,4 +92,12 @@ type IncidentData struct {
 	ComponentIds []string          `json:"component_ids"`
 	Components   map[string]string `json:"components"`
 	Metadata     Metadata          `json:"metadata"`
+}
+
+type DeleteIncident struct {
+	ID      string
+	Title   string
+	Message string
+	APIKey  string
+	PageID  string
 }

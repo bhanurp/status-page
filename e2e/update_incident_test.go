@@ -9,7 +9,10 @@ import (
 
 func TestUpdateIncident(t *testing.T) {
 	utils.Inite2e()
-	apiKey, statusPageID, statusPageComponentID, hostName := utils.FetchStatusPageDetails()
+	apiKey := utils.FetchAPIKey()
+	statusPageID := utils.FetchStatusPageID()
+	statusPageComponentID := utils.FetchStatusPageComponentID()
+	hostName := utils.FetchHostName()
 
 	utils.CreateIncident(apiKey, hostName, statusPageComponentID, statusPageID, "TestUpdateIncident", "", t)
 	incidents, err := utils.FetchUnresolvedIncidents()

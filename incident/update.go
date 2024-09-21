@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 	"strings"
-	"sync"
 
 	"github.com/bhanurp/rest"
 	"github.com/bhanurp/status-page/logger"
@@ -64,9 +63,8 @@ func (u *UpdateIncident) SetIncidentBody(incidentBody string) {
 
 // ResolveIncidents fetches all unresolved incidents on the status page and filters
 // components interested in to be updated
-func (u *UpdateIncident) ResolveIncidents(wg *sync.WaitGroup) error {
+func (u *UpdateIncident) ResolveIncidents() error {
 	var unresolvedIncidents []string
-	defer wg.Done()
 	// Create http request with incident name, status, component ID and status
 	incidents, err := u.FetchUnresolvedIncidents()
 	if err != nil {

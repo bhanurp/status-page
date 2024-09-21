@@ -4,13 +4,22 @@ import (
 	"testing"
 
 	"github.com/bhanurp/status-page/e2e/utils"
+	"github.com/bhanurp/status-page/incident"
 )
 
 func TestCreateIncident(t *testing.T) {
 	utils.Inite2e()
+	apiKey := utils.FetchAPIKey()
+	statusPageID := utils.FetchStatusPageID()
+	statusPageComponentID := utils.FetchStatusPageComponentID()
+	hostName := utils.FetchHostName()
+	incidentName := utils.GetIncidentName()
 	numberOfIncidents := utils.FetchUnresolvedIncidentsCount()
-	apiKey, statusPageID, statusPageComponentID, hostName := utils.FetchStatusPageDetails()
-	utils.CreateIncident(apiKey, hostName, statusPageComponentID, statusPageID, "TestFailure1", "", t)
+	createIncidentClient := incident.NewDefaultIncident(apiKey, hostName, statusPageComponentID, statusPageID, incidentName, "")
+	_, err := incident.CreateNewIncident(createIncidentClient)
+	if err != nil {
+		t.Fatalf("Failed to create incident: %v", err)
+	}
 	// Verify the created incident
 	numberOfIncidentsAfterCreate := utils.FetchUnresolvedIncidentsCount()
 	if numberOfIncidentsAfterCreate != numberOfIncidents+1 {

@@ -7,14 +7,6 @@ import (
 )
 
 // Incident represents an incident in the status page
-type DeleteIncident struct {
-	ID      string
-	Title   string
-	Message string
-	APIKey  string
-	PageID  string
-}
-
 func (d *DeleteIncident) SetTitle(title string) *DeleteIncident {
 	d.Title = title
 	return d
