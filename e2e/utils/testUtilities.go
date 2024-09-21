@@ -58,7 +58,7 @@ func CreateStatusPageURL(pageID, incidentID string) string {
 }
 
 func FetchAPIKey() string {
-	return os.Getenv("API_KEY")
+	return os.Getenv("STATUS_PAGE_BEARER_TOKEN")
 }
 
 func FetchStatusPageID() string {

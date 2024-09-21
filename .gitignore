@@ -1,3 +1,4 @@
 /status-page
 .idea
 .vscode
+e2e/utils/statuspage.env
