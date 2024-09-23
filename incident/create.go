@@ -7,6 +7,7 @@ import (
 	"reflect"
 
 	"github.com/bhanurp/rest"
+	"github.com/bhanurp/status-page/common"
 	"github.com/bhanurp/status-page/logger"
 
 	"go.uber.org/zap"
@@ -150,7 +151,7 @@ func (c *CreateIncident) SendCreateIncidentRequest() (*Incident, error) {
 
 // fetchUnresolvedIncidents returns all unresolved incidents for the status page
 func fetchUnresolvedIncidents() ([]Incident, error) {
-	apiKey, pageID, _, hostName := FetchStatusPageDetails()
+	apiKey, pageID, _, hostName := common.FetchStatusPageDetails()
 	incidents := make([]Incident, 0)
 	get := rest.GetRequest{}
 	resp, err := get.Do("https://"+hostName+"/v1/pages/"+pageID+"/incidents/unresolved", nil, map[string]string{"Authorization": "OAuth " + apiKey}, 10)

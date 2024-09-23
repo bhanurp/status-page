@@ -1,5 +1,7 @@
 package incident
 
+import "github.com/bhanurp/status-page/common"
+
 func ResolveAllIncident() error {
 	incident := UpdateIncident{}
 	incident.ResolveIncidents()
@@ -23,6 +25,6 @@ func DeleteGivenIncident(incident *DeleteIncident) error {
 }
 
 func FetchIncidentByIncidentID(incidentID string) (*Incident, error) {
-	apiKey, statusPageID, _, hostName := FetchStatusPageDetails()
+	apiKey, statusPageID, _, hostName := common.FetchStatusPageDetails()
 	return fetchIncidentByIncidentID(apiKey, hostName, statusPageID, incidentID)
 }

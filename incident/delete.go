@@ -2,6 +2,7 @@ package incident
 
 import (
 	"github.com/bhanurp/rest"
+	"github.com/bhanurp/status-page/common"
 	"github.com/bhanurp/status-page/logger"
 	"go.uber.org/zap"
 )
@@ -38,7 +39,7 @@ func (d *DeleteIncident) SetID(id string) *DeleteIncident {
 
 // DeleteIncidentHandler handles the deletion of an incident
 func (d *DeleteIncident) DeleteIncidentHandler() error {
-	headers := createHeaders(d.APIKey)
+	headers := common.CreateHeaders()
 
 	// Delete the incident from the status page
 	responseBody, err := deleteIncident(d.ID, d.PageID, headers)

@@ -5,12 +5,23 @@ import (
 	"os"
 	"testing"
 
+	"github.com/joho/godotenv"
+	"go.uber.org/zap/zapcore"
+
 	"github.com/bhanurp/status-page/incident"
 	"github.com/bhanurp/status-page/logger"
 )
 
 func Inite2e() {
 	logger.Info("Starting e2e tests")
+	envPath := "utils/statuspage.env"
+	if _, err := os.Stat(envPath); err == nil {
+		if err := godotenv.Load(envPath); err != nil {
+			logger.Warn("Error loading statuspage.env file: %v", zapcore.Field{Key: "error", Type: zapcore.ErrorType, Interface: err})
+		}
+	} else {
+		logger.Info("File statuspage.env not found, proceeding without it")
+	}
 }
 
 func CreateIncident(apiKey, hostName, statusPageComponentID, statusPageID, incidentName, incidentBody string, t *testing.T) {
