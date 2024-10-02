@@ -43,6 +43,10 @@ func FetchStatusPageDetails() (string, string, string, string) {
 	return apiKey, statusPageID, statusPageComponentID, hostName
 }
 
+func FetchStatusPageID() string {
+	return os.Getenv("STATUS_PAGE_ID")
+}
+
 // Helper function to read the API key from a file
 func readAPIKeyFromFile(filePath string) (string, error) {
 	// Read the content of the file

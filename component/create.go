@@ -8,12 +8,13 @@ import (
 	"github.com/bhanurp/rest"
 	"github.com/bhanurp/status-page/common"
 	"github.com/bhanurp/status-page/logger"
+	"github.com/bhanurp/status-page/statuspageurl"
 )
 
 // createComponent creates a new component in the StatusPage API
-func createComponent(hostName, statusPageID string, newComponent Component) (*Component, error) {
+func createComponent(statusPageID string, newComponent Component) (*Component, error) {
 	var err error
-	url := fmt.Sprintf("https://%s/v1/pages/%s/components", hostName, statusPageID)
+	url := statuspageurl.ConstructURL("pages/%s/components", statusPageID)
 	jsonData, err := fetchComponentData(newComponent)
 	if err != nil {
 		return nil, err

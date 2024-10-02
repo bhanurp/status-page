@@ -5,32 +5,31 @@ import (
 )
 
 func FetchAllComponents() ([]Component, error) {
-	_, statusPageID, _, hostName := common.FetchStatusPageDetails()
-	return fetchAllComponents(hostName, statusPageID)
+	statusPageID := common.FetchStatusPageID()
+	return fetchAllComponents(statusPageID)
 }
 
 func FetchComponentByComponentID(componentID string) (*Component, error) {
-	_, statusPageID, _, hostName := common.FetchStatusPageDetails()
-	return fetchComponentByComponentID(hostName, statusPageID, componentID)
+	statusPageID := common.FetchStatusPageID()
+	return fetchComponentByComponentID(statusPageID, componentID)
 }
 
 func FetchComponentByComponentName(componentName string) (*Component, error) {
-	_, statusPageID, _, hostName := common.FetchStatusPageDetails()
-	return fetchComponentByComponentName(hostName, statusPageID, componentName)
+	statusPageID := common.FetchStatusPageID()
+	return fetchComponentByComponentName(statusPageID, componentName)
 }
 
 func CreateComponent(name, description, status string) (*Component, error) {
-
 	newComponent := Component{
 		Name:        name,
 		Description: description,
 		Status:      status,
 	}
-	_, statusPageID, _, hostName := common.FetchStatusPageDetails()
-	return createComponent(hostName, statusPageID, newComponent)
+	statusPageID := common.FetchStatusPageID()
+	return createComponent(statusPageID, newComponent)
 }
 
 func DeleteComponent(componentID string) error {
-	_, statusPageID, _, _ := common.FetchStatusPageDetails()
+	statusPageID := common.FetchStatusPageID()
 	return deleteComponent(statusPageID, componentID)
 }

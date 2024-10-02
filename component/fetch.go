@@ -7,11 +7,12 @@ import (
 	"github.com/bhanurp/rest"
 	"github.com/bhanurp/status-page/common"
 	"github.com/bhanurp/status-page/logger"
+	"github.com/bhanurp/status-page/statuspageurl"
 	"go.uber.org/zap"
 )
 
-func fetchComponentByComponentID(hostName, statusPageID, componentID string) (*Component, error) {
-	components, err := fetchAllComponents(hostName, statusPageID)
+func fetchComponentByComponentID(statusPageID, componentID string) (*Component, error) {
+	components, err := fetchAllComponents(statusPageID)
 	if err != nil {
 		return nil, err
 	}
@@ -23,8 +24,8 @@ func fetchComponentByComponentID(hostName, statusPageID, componentID string) (*C
 	return nil, fmt.Errorf("component not found with ID: %s", componentID)
 }
 
-func fetchComponentByComponentName(hostName, statusPageID, componentName string) (*Component, error) {
-	components, err := fetchAllComponents(hostName, statusPageID)
+func fetchComponentByComponentName(statusPageID, componentName string) (*Component, error) {
+	components, err := fetchAllComponents(statusPageID)
 	if err != nil {
 		return nil, err
 	}
@@ -36,8 +37,8 @@ func fetchComponentByComponentName(hostName, statusPageID, componentName string)
 	return nil, fmt.Errorf("component not found with name: %s", componentName)
 }
 
-func fetchAllComponents(hostName, statusPageID string) ([]Component, error) {
-	url := fmt.Sprintf("https://%s/v1/pages/%s/components", hostName, statusPageID)
+func fetchAllComponents(statusPageID string) ([]Component, error) {
+	url := statuspageurl.ConstructURL("pages/%s/components", statusPageID)
 	headers := common.CreateHeaders()
 	getComponents := rest.GetRequest{}
 	resp, err := getComponents.Do(url, []byte{}, headers, 10)
