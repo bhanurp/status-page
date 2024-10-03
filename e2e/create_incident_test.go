@@ -12,10 +12,9 @@ func TestCreateIncident(t *testing.T) {
 	apiKey := utils.FetchAPIKey()
 	statusPageID := utils.FetchStatusPageID()
 	statusPageComponentID := utils.FetchStatusPageComponentID()
-	hostName := utils.FetchHostName()
 	incidentName := utils.GetIncidentName()
 	numberOfIncidents := utils.FetchUnresolvedIncidentsCount()
-	createIncidentClient := incident.NewDefaultIncident(apiKey, hostName, statusPageComponentID, statusPageID, incidentName, "")
+	createIncidentClient := incident.NewDefaultIncident(apiKey, statusPageComponentID, statusPageID, incidentName, "")
 	_, err := incident.CreateNewIncident(createIncidentClient)
 	if err != nil {
 		t.Fatalf("Failed to create incident: %v", err)

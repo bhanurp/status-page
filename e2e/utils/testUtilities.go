@@ -24,8 +24,8 @@ func Inite2e() {
 	}
 }
 
-func CreateIncident(apiKey, hostName, statusPageComponentID, statusPageID, incidentName, incidentBody string, t *testing.T) {
-	client := incident.NewDefaultIncident(apiKey, hostName, statusPageComponentID, statusPageID, incidentName, incidentBody)
+func CreateIncident(apiKey, statusPageComponentID, statusPageID, incidentName, incidentBody string, t *testing.T) {
+	client := incident.NewDefaultIncident(apiKey, statusPageComponentID, statusPageID, incidentName, incidentBody)
 	_, err := client.SendCreateIncidentRequest()
 	if err != nil {
 		t.Fatalf("Failed to post incident: %v", err)

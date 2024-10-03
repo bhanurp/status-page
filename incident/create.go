@@ -3,21 +3,19 @@ package incident
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"reflect"
 
 	"github.com/bhanurp/rest"
-	"github.com/bhanurp/status-page/common"
 	"github.com/bhanurp/status-page/logger"
+	"github.com/bhanurp/status-page/statuspageurl"
 
 	"go.uber.org/zap"
 )
 
 // NewDefaultIncident creates incident struct and returns the pointer to it
-func NewDefaultIncident(apiKey, hostName, componentID, pageID, incidentName, incidentBody string) *CreateIncident {
+func NewDefaultIncident(apiKey, componentID, pageID, incidentName, incidentBody string) *CreateIncident {
 	c := new(CreateIncident)
 	c.APIKey = apiKey
-	c.HostName = hostName
 	c.ComponentID = componentID
 	c.PageID = pageID
 	c.IncidentName = incidentName
@@ -34,12 +32,6 @@ func BuildCreateIncident() *CreateIncident {
 // SetAPIKey sets the API key and returns the CreateIncident pointer
 func (c *CreateIncident) SetAPIKey(apiKey string) *CreateIncident {
 	c.APIKey = apiKey
-	return c
-}
-
-// SetHostName sets the host name and returns the CreateIncident pointer
-func (c *CreateIncident) SetHostName(hostName string) *CreateIncident {
-	c.HostName = hostName
 	return c
 }
 
@@ -97,7 +89,7 @@ func (c *CreateIncident) UpdateIncidentonFailureReasonChange(updateIncidents []s
 		return nil
 	}
 	// If incident metadata is
-	u := NewUpdateIncident(c.APIKey, c.HostName, c.ComponentID, c.PageID, c.IncidentBody, c.IncidentHeader, IncidentStatusIdentified)
+	u := NewUpdateIncident(c.APIKey, c.ComponentID, c.PageID, c.IncidentBody, c.IncidentHeader, IncidentStatusIdentified)
 	u.IncidentName = c.IncidentName
 	u.Metadata = c.Metadata
 
@@ -129,7 +121,7 @@ func (c *CreateIncident) SendCreateIncidentRequest() (*Incident, error) {
 	headers["Authorization"] = "OAuth " + c.APIKey
 	headers["Content-Type"] = "application/json"
 	p := rest.PostRequest{}
-	resp, err := p.Do("https://"+c.HostName+"/v1/pages/"+c.PageID+"/incidents", payloadBytes, headers, 10)
+	resp, err := p.Do(statuspageurl.BaseURL+"pages/"+c.PageID+"/incidents", payloadBytes, headers, 10)
 	if err != nil {
 		return nil, err
 	}
@@ -147,44 +139,4 @@ func (c *CreateIncident) SendCreateIncidentRequest() (*Incident, error) {
 	}
 	logger.Debug(string(resp.Body))
 	return &createdIncident, err
-}
-
-// fetchUnresolvedIncidents returns all unresolved incidents for the status page
-func fetchUnresolvedIncidents() ([]Incident, error) {
-	apiKey, pageID, _, hostName := common.FetchStatusPageDetails()
-	incidents := make([]Incident, 0)
-	get := rest.GetRequest{}
-	resp, err := get.Do("https://"+hostName+"/v1/pages/"+pageID+"/incidents/unresolved", nil, map[string]string{"Authorization": "OAuth " + apiKey}, 10)
-	if err != nil {
-		return incidents, err
-	}
-	response := string(resp.Body)
-	logger.Debug("Response from fetch all unresolved ", zap.String("Response", response))
-	if resp.StatusCode == http.StatusOK {
-		err = json.Unmarshal(resp.Body, &incidents)
-		if err != nil {
-			return incidents, err
-		}
-	}
-	logger.Debug(string(resp.Body))
-	return incidents, nil
-}
-
-func fetchIncidentByIncidentID(apiKey, hostName, pageID, incidentID string) (*Incident, error) {
-	incident := new(Incident)
-	get := rest.GetRequest{}
-	resp, err := get.Do("https://"+hostName+"/v1/pages/"+pageID+"/incidents/"+incidentID, nil, map[string]string{"Authorization": "OAuth " + apiKey}, 10)
-	if err != nil {
-		return incident, err
-	}
-	response := string(resp.Body)
-	logger.Debug("Response from fetch incident by ID ", zap.String("Response", response))
-	if resp.StatusCode == http.StatusOK {
-		err = json.Unmarshal(resp.Body, incident)
-		if err != nil {
-			return incident, err
-		}
-	}
-	logger.Debug(string(resp.Body))
-	return incident, nil
 }

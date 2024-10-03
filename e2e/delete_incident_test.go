@@ -13,7 +13,6 @@ func TestDeleteIncident(t *testing.T) {
 	apiKey := utils.FetchAPIKey()
 	statusPageID := utils.FetchStatusPageID()
 	statusPageComponentID := utils.FetchStatusPageComponentID()
-	hostName := utils.FetchHostName()
 
 	deleteIncident := incident.BuildDeleteIncident()
 	deleteIncident.SetAPIKey(apiKey).
@@ -21,7 +20,7 @@ func TestDeleteIncident(t *testing.T) {
 		SetTitle("Test Incident for Deletion").
 		SetMessage("Test Incident for Deletion")
 
-	createdIncident := incident.NewDefaultIncident(apiKey, hostName, statusPageComponentID, statusPageID, "Test Incident for Deletion", "")
+	createdIncident := incident.NewDefaultIncident(apiKey, statusPageComponentID, statusPageID, "Test Incident for Deletion", "")
 	_, err := createdIncident.SendCreateIncidentRequest()
 	if err != nil {
 		t.Fatalf("Failed to create incident: %v", err)

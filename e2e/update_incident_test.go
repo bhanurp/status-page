@@ -12,9 +12,8 @@ func TestUpdateIncident(t *testing.T) {
 	apiKey := utils.FetchAPIKey()
 	statusPageID := utils.FetchStatusPageID()
 	statusPageComponentID := utils.FetchStatusPageComponentID()
-	hostName := utils.FetchHostName()
 
-	utils.CreateIncident(apiKey, hostName, statusPageComponentID, statusPageID, "TestUpdateIncident", "", t)
+	utils.CreateIncident(apiKey, statusPageComponentID, statusPageID, "TestUpdateIncident", "", t)
 	incidents, err := utils.FetchUnresolvedIncidents()
 	if err != nil {
 		t.Fatalf("Failed to fetch unresolved incidents: %v", err)
@@ -24,7 +23,7 @@ func TestUpdateIncident(t *testing.T) {
 		t.Fatalf("Failed to find incident with name 'TestUpdateIncident' in unresolved incidents")
 	}
 	countOfIncidentsBeforeUpdate := len(incidents)
-	updateIncident := incident.NewUpdateIncident(apiKey, hostName, statusPageComponentID, statusPageID, "UpdatedIncidentBody", "", incident.IncidentStatusResolved)
+	updateIncident := incident.NewUpdateIncident(apiKey, statusPageComponentID, statusPageID, "UpdatedIncidentBody", "", incident.IncidentStatusResolved)
 	updateIncident.SetIncidentName(incidentToBeUpdated.Name)
 	// Create an incident to update
 	err = updateIncident.UpdateIncidentMatchingWithComponent(incidentToBeUpdated.ID, incident.ComponentStatusOperational)

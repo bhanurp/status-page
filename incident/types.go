@@ -5,7 +5,6 @@ import (
 )
 
 type CreateIncident struct {
-	HostName       string
 	APIKey         string
 	IncidentName   string
 	IncidentStatus string

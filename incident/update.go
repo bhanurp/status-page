@@ -16,10 +16,9 @@ func NewDefaultUpdateIncident() *UpdateIncident {
 	return new(UpdateIncident)
 }
 
-func NewUpdateIncident(apiKey, hostName, componentID, pageID, incidentBody, incidentHeader, incidentStatus string) *UpdateIncident {
+func NewUpdateIncident(apiKey, componentID, pageID, incidentBody, incidentHeader, incidentStatus string) *UpdateIncident {
 	u := new(UpdateIncident)
 	u.APIKey = apiKey
-	u.HostName = hostName
 	u.ComponentID = componentID
 	u.PageID = pageID
 	u.IncidentStatus = incidentStatus
