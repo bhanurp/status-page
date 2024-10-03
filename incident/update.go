@@ -8,6 +8,7 @@ import (
 
 	"github.com/bhanurp/rest"
 	"github.com/bhanurp/status-page/logger"
+	"github.com/bhanurp/status-page/statuspageurl"
 
 	"go.uber.org/zap"
 )
@@ -120,7 +121,7 @@ func (u *UpdateIncident) UpdateIncidentMatchingWithComponent(unresolvedIncident 
 	m["Authorization"] = "OAuth " + u.APIKey
 	m["Content-Type"] = "application/json"
 	put := &rest.PutRequest{}
-	resp, err := put.Do("https://"+u.HostName+"/v1/pages/"+u.PageID+"/incidents/"+unresolvedIncident, payloadBytes, m, 10)
+	resp, err := put.Do(statuspageurl.BaseURL+"pages/"+u.PageID+"/incidents/"+unresolvedIncident, payloadBytes, m, 10)
 	if err != nil {
 		return err
 	}
