@@ -7,15 +7,16 @@ import (
 	"github.com/bhanurp/rest"
 	"github.com/bhanurp/status-page/common"
 	"github.com/bhanurp/status-page/logger"
+	"github.com/bhanurp/status-page/statuspageurl"
 	"go.uber.org/zap"
 )
 
 // fetchUnresolvedIncidents returns all unresolved incidents for the status page
 func fetchUnresolvedIncidents() ([]Incident, error) {
-	apiKey, pageID, _, hostName := common.FetchStatusPageDetails()
+	apiKey, pageID, _, _ := common.FetchStatusPageDetails()
 	incidents := make([]Incident, 0)
 	get := rest.GetRequest{}
-	resp, err := get.Do("https://"+hostName+"/v1/pages/"+pageID+"/incidents/unresolved", nil, map[string]string{"Authorization": "OAuth " + apiKey}, 10)
+	resp, err := get.Do(statuspageurl.BaseURL+"pages/"+pageID+"/incidents/unresolved", nil, map[string]string{"Authorization": "OAuth " + apiKey}, 10)
 	if err != nil {
 		return incidents, err
 	}
@@ -31,10 +32,10 @@ func fetchUnresolvedIncidents() ([]Incident, error) {
 	return incidents, nil
 }
 
-func fetchIncidentByIncidentID(apiKey, hostName, pageID, incidentID string) (*Incident, error) {
+func fetchIncidentByIncidentID(apiKey, pageID, incidentID string) (*Incident, error) {
 	incident := new(Incident)
 	get := rest.GetRequest{}
-	resp, err := get.Do("https://"+hostName+"/v1/pages/"+pageID+"/incidents/"+incidentID, nil, map[string]string{"Authorization": "OAuth " + apiKey}, 10)
+	resp, err := get.Do(statuspageurl.BaseURL+"pages/"+pageID+"/incidents/"+incidentID, nil, map[string]string{"Authorization": "OAuth " + apiKey}, 10)
 	if err != nil {
 		return incident, err
 	}
@@ -48,4 +49,20 @@ func fetchIncidentByIncidentID(apiKey, hostName, pageID, incidentID string) (*In
 	}
 	logger.Debug(string(resp.Body))
 	return incident, nil
+}
+
+func fetchUpcomingIncidents() ([]Incident, error) {
+	apiKey, pageID, _, _ := common.FetchStatusPageDetails()
+	incidents := make([]Incident, 0)
+	get := rest.GetRequest{}
+	resp, err := get.Do(statuspageurl.BaseURL+"pages/"+pageID+"/incidents/upcoming", nil, map[string]string{"Authorization": "OAuth " + apiKey}, 10)
+	if err != nil {
+		return incidents, err
+	}
+	if resp.StatusCode == http.StatusOK {
+		err = json.Unmarshal(resp.Body, &incidents)
+		if err != nil {
+			return incidents, err
+		}
+	}
 }

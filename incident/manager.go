@@ -25,6 +25,10 @@ func DeleteGivenIncident(incident *DeleteIncident) error {
 }
 
 func FetchIncidentByIncidentID(incidentID string) (*Incident, error) {
-	apiKey, statusPageID, _, hostName := common.FetchStatusPageDetails()
-	return fetchIncidentByIncidentID(apiKey, hostName, statusPageID, incidentID)
+	apiKey, statusPageID, _, _ := common.FetchStatusPageDetails()
+	return fetchIncidentByIncidentID(apiKey, statusPageID, incidentID)
+}
+
+func FetchUpcomingIncidents() ([]Incident, error) {
+	return fetchUpcomingIncidents()
 }
