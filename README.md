@@ -1,6 +1,7 @@
 # Status Page
 
 ![Build Status](https://github.com/bhanurp/status-page/actions/workflows/go.yml/badge.svg)
+![Test Status](https://github.com/bhanurp/status-page/actions/workflows/test.yml/badge.svg)
 
 This repository contains the code for the status page http go client, which allows for the creation, updating, and deletion of incidents.
 
