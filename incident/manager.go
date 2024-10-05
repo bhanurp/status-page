@@ -32,3 +32,11 @@ func FetchIncidentByIncidentID(incidentID string) (*Incident, error) {
 func FetchUpcomingIncidents() ([]Incident, error) {
 	return fetchUpcomingIncidents()
 }
+
+func FetchUpcomingActiveMaintainaances() ([]Incident, error) {
+	return fetchUpcomingActiveMaintainaances()
+}
+
+func FetchUpcomingScheduledIncidents() ([]Incident, error) {
+	return fetchUpcomingScheduledIncidents()
+}
