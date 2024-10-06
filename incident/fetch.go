@@ -14,16 +14,16 @@ import (
 // fetchUnresolvedIncidents returns all unresolved incidents for the status page
 func fetchUnresolvedIncidents() ([]Incident, error) {
 	apiKey, pageID, _, _ := common.FetchStatusPageDetails()
-	incidents := make([]Incident, 0)
 	get := rest.GetRequest{}
 	resp, err := get.Do(statuspageurl.BaseURL+"pages/"+pageID+"/incidents/unresolved", nil, map[string]string{"Authorization": "OAuth " + apiKey}, 10)
 	if err != nil {
-		return incidents, err
+		return []Incident{}, err
 	}
-	return handleResponse(resp, incidents)
+	return handleResponse(resp)
 }
 
-func handleResponse(resp *rest.Response, incidents []Incident) ([]Incident, error) {
+func handleResponse(resp *rest.Response) ([]Incident, error) {
+	incidents := make([]Incident, 0)
 	if resp.StatusCode == http.StatusOK {
 		err := json.Unmarshal(resp.Body, &incidents)
 		if err != nil {
@@ -31,7 +31,7 @@ func handleResponse(resp *rest.Response, incidents []Incident) ([]Incident, erro
 		}
 	}
 	logger.Debug(string(resp.Body))
-	return nil, nil
+	return incidents, nil
 }
 
 func fetchIncidentByIncidentID(apiKey, pageID, incidentID string) (*Incident, error) {
@@ -55,33 +55,30 @@ func fetchIncidentByIncidentID(apiKey, pageID, incidentID string) (*Incident, er
 
 func fetchUpcomingIncidents() ([]Incident, error) {
 	apiKey, pageID, _, _ := common.FetchStatusPageDetails()
-	incidents := make([]Incident, 0)
 	get := rest.GetRequest{}
 	resp, err := get.Do(statuspageurl.BaseURL+"pages/"+pageID+"/incidents/upcoming", nil, map[string]string{"Authorization": "OAuth " + apiKey}, 10)
 	if err != nil {
-		return incidents, err
+		return []Incident{}, err
 	}
-	return handleResponse(resp, incidents)
+	return handleResponse(resp)
 }
 
 func fetchUpcomingActiveMaintainaances() ([]Incident, error) {
 	apiKey, pageID, _, _ := common.FetchStatusPageDetails()
-	incidents := make([]Incident, 0)
 	get := rest.GetRequest{}
 	resp, err := get.Do(statuspageurl.BaseURL+"pages/"+pageID+"/incidents/upcoming_active_maintenances", nil, map[string]string{"Authorization": "OAuth " + apiKey}, 10)
 	if err != nil {
-		return incidents, err
+		return []Incident{}, err
 	}
-	return handleResponse(resp, incidents)
+	return handleResponse(resp)
 }
 
 func fetchUpcomingScheduledIncidents() ([]Incident, error) {
 	apiKey, pageID, _, _ := common.FetchStatusPageDetails()
-	incidents := make([]Incident, 0)
 	get := rest.GetRequest{}
 	resp, err := get.Do(statuspageurl.BaseURL+"pages/"+pageID+"/incidents/scheduled", nil, map[string]string{"Authorization": "OAuth " + apiKey}, 10)
 	if err != nil {
-		return incidents, err
+		return []Incident{}, err
 	}
-	return handleResponse(resp, incidents)
+	return handleResponse(resp)
 }

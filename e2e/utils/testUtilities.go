@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/joho/godotenv"
+	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
 	"github.com/bhanurp/status-page/incident"
@@ -58,9 +59,10 @@ func FetchIncidentByNameFromUnresolvedIncidents(incidentName string) incident.In
 		log.Println(i.Name)
 		if i.Name == incidentName {
 			log.Println("Incident to be updated: ", i.Name)
-			incidentIdentified = i
+			return i
 		}
 	}
+	logger.Error("failed to find incident with name: ", zap.String("incidentName", incidentName))
 	return incidentIdentified
 }
 

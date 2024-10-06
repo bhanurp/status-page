@@ -1,6 +1,7 @@
 package e2e
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/bhanurp/status-page/e2e/utils"
@@ -18,7 +19,7 @@ func TestUpdateIncident(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to fetch unresolved incidents: %v", err)
 	}
-	incidentToBeUpdated := utils.FetchIncidentByNameFromUnresolvedIncidents(incident.IncidentNamePrefix + " TestUpdateIncident")
+	incidentToBeUpdated := utils.FetchIncidentByNameFromUnresolvedIncidents(fmt.Sprintf("%s %s", incident.IncidentNamePrefix, "TestUpdateIncident"))
 	if incidentToBeUpdated.ID == "" {
 		t.Fatalf("Failed to find incident with name 'TestUpdateIncident' in unresolved incidents")
 	}

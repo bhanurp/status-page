@@ -22,7 +22,6 @@ The `status-page` provides an API for managing incidents on a status page. It in
   - `STATUS_PAGE_BEARER_TOKEN`: Your API key for authentication
   - `STATUS_PAGE_ID`: The ID of your status page
   - `STATUS_PAGE_COMPONENT_ID`: The ID of your status page component
-  - `STATUS_PAGE_HOSTNAME`: The hostname of your status page API
 
 ### Installation
 
@@ -65,9 +64,8 @@ func main() {
     apiKey := os.Getenv("STATUS_PAGE_BEARER_TOKEN")
     statusPageID := os.Getenv("STATUS_PAGE_ID")
     statusPageComponentID := os.Getenv("STATUS_PAGE_COMPONENT_ID")
-    hostName := os.Getenv("STATUS_PAGE_HOSTNAME")
 
-    client := incident.NewClient(apiKey, hostName, statusPageComponentID, statusPageID)
+    client := incident.NewClient(apiKey, statusPageComponentID, statusPageID)
     incident := incident.Incident{
         Name:   "Test Incident",
         Status: "investigating",
@@ -100,9 +98,8 @@ func main() {
     apiKey := os.Getenv("STATUS_PAGE_BEARER_TOKEN")
     statusPageID := os.Getenv("STATUS_PAGE_ID")
     statusPageComponentID := os.Getenv("STATUS_PAGE_COMPONENT_ID")
-    hostName := os.Getenv("STATUS_PAGE_HOSTNAME")
 
-    client := incident.NewClient(apiKey, hostName, statusPageComponentID, statusPageID)
+    client := incident.NewClient(apiKey, statusPageComponentID, statusPageID)
     incidentID := "incident_id_here"
     updatedIncident := incident.Incident{
         ID:     incidentID,
@@ -137,9 +134,8 @@ func main() {
     apiKey := os.Getenv("STATUS_PAGE_BEARER_TOKEN")
     statusPageID := os.Getenv("STATUS_PAGE_ID")
     statusPageComponentID := os.Getenv("STATUS_PAGE_COMPONENT_ID")
-    hostName := os.Getenv("STATUS_PAGE_HOSTNAME")
 
-    client := incident.NewClient(apiKey, hostName, statusPageComponentID, statusPageID)
+    client := incident.NewClient(apiKey, statusPageComponentID, statusPageID)
     incidentID := "incident_id_here"
 
     err := client.DeleteIncident(incidentID)
