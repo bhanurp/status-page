@@ -33,3 +33,15 @@ func DeleteComponent(componentID string) error {
 	statusPageID := common.FetchStatusPageID()
 	return deleteComponent(statusPageID, componentID)
 }
+
+func UpdateComponent(componentID, name, description, status, groupID, statusPageID string) (*Component, error) {
+	component := Component{
+		ID:          componentID,
+		Name:        name,
+		Description: description,
+		Status:      status,
+		GroupID:     groupID,
+		PageID:      statusPageID,
+	}
+	return updateComponent(component)
+}
